@@ -29,15 +29,18 @@ public class AccountService {
 	}
 
 	@Transactional
-	public void create(long providerId, String accountName) {
-		Provider provider = providerService.find(providerId);
-		entityManager.persist(new Account(provider, accountName));
+	public Account create(long providerId, String accountName) {
+		var provider = providerService.find(providerId);
+		var account = new Account(provider, accountName);
+		entityManager.persist(account);
+		return account;
 	}
 
 	@Transactional
-	public void delete(long providerId, long accountId) {
-		Account account = find(providerId, accountId);
+	public Account delete(long accountId) {
+		var account = find(accountId);
 		entityManager.remove(account);
+		return account;
 	}
 
 	public List<Account> listForProvider(Provider provider) {
@@ -49,15 +52,19 @@ public class AccountService {
 				.getResultList();
 	}
 
-	private Account find(long providerId, long accountId) {
-		return session
+	private Account find(long accountId) {
+		var account = session
 				.createQuery("""
 						FROM Account as a
-						WHERE a.provider.id = :providerId
-						AND a.id = :accountId""",
+						WHERE a.id = :accountId""",
 						Account.class)
-				.setParameter("providerId", providerId)
 				.setParameter("accountId", accountId)
 				.getSingleResultOrNull();
+
+		if (account == null) {
+			throw new AccountNotFoundException();
+		}
+
+		return account;
 	}
 }

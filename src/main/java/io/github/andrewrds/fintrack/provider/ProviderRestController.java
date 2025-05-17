@@ -1,10 +1,13 @@
 package io.github.andrewrds.fintrack.provider;
 
+import java.util.List;
+
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,6 +33,11 @@ public class ProviderRestController {
 	public Provider delete(@NotNull Long id, HttpSession session) {
 		return providerService.delete(id);
 	}
+	
+	@GetMapping("/provider/list")
+	public List<Provider> list() {
+		return providerService.list();
+	}
 
 	@ExceptionHandler(DataIntegrityViolationException.class)
 	public ResponseEntity<FintrackError> handleDataIntegrityViolationException(
@@ -51,6 +59,6 @@ public class ProviderRestController {
 			HttpServletRequest request,
 			ProviderNotFoundException e) {
 		var error = new FintrackError("No provider exists with the supplied id");
-		return new ResponseEntity<FintrackError>(error, HttpStatus.CONFLICT);
+		return new ResponseEntity<FintrackError>(error, HttpStatus.NOT_FOUND);
 	}
 }
