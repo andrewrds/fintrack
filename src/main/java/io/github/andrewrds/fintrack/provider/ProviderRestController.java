@@ -2,19 +2,18 @@ package io.github.andrewrds.fintrack.provider;
 
 import java.util.List;
 
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.github.andrewrds.fintrack.FintrackError;
+import io.github.andrewrds.fintrack.FintrackResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.constraints.NotNull;
 
 @RestController
 public class ProviderRestController {
@@ -25,13 +24,14 @@ public class ProviderRestController {
 	}
 
 	@PostMapping("/provider/create")
-	public Provider create(@NotNull String name, HttpSession session) {
-		return providerService.create(name);
+	public Provider create(@RequestBody CreateProviderRequest req, HttpSession session) {
+		return providerService.create(req.getName());
 	}
 
 	@PostMapping("/provider/delete")
-	public Provider delete(@NotNull Long id, HttpSession session) {
-		return providerService.delete(id);
+	public FintrackResponse delete(@RequestBody DeleteProviderRequest req, HttpSession session) {
+		providerService.delete(req.getId());
+		return new FintrackResponse("Provider deleted");
 	}
 	
 	@GetMapping("/provider/list")
@@ -39,19 +39,13 @@ public class ProviderRestController {
 		return providerService.list();
 	}
 
-	@ExceptionHandler(DataIntegrityViolationException.class)
-	public ResponseEntity<FintrackError> handleDataIntegrityViolationException(
+	@ExceptionHandler(DuplicateProviderNameException.class)
+	public ResponseEntity<FintrackError> handleDuplicateProviderNameException(
 			HttpServletRequest request,
-			DataIntegrityViolationException e) {
-
-		if (e.getCause() instanceof ConstraintViolationException v) {
-			if (v.getConstraintName().equals("uq_name")) {
-				var error = new FintrackError("A provider with the same name already exists");
-				return new ResponseEntity<>(error, HttpStatus.CONFLICT);
-			}
-		}
-
-		throw e;
+			DuplicateProviderNameException e) {
+		var error = new FintrackError("A provider with the same name already exists");
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(error);
 	}
 
 	@ExceptionHandler(ProviderNotFoundException.class)
@@ -59,6 +53,7 @@ public class ProviderRestController {
 			HttpServletRequest request,
 			ProviderNotFoundException e) {
 		var error = new FintrackError("No provider exists with the supplied id");
-		return new ResponseEntity<FintrackError>(error, HttpStatus.NOT_FOUND);
+		return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(error);
 	}
 }

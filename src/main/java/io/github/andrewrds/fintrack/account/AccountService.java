@@ -37,10 +37,12 @@ public class AccountService {
 	}
 
 	@Transactional
-	public Account delete(long accountId) {
-		var account = find(accountId);
-		entityManager.remove(account);
-		return account;
+	public void delete(long accountId) {
+		session.createMutationQuery("""
+				DELETE FROM Account
+				WHERE id = :id""")
+				.setParameter("id", accountId)
+				.executeUpdate();
 	}
 
 	public List<Account> listForProvider(Provider provider) {
@@ -50,21 +52,5 @@ public class AccountService {
 				ORDER BY a.name""", Account.class)
 				.setParameter("providerId", provider.getId())
 				.getResultList();
-	}
-
-	private Account find(long accountId) {
-		var account = session
-				.createQuery("""
-						FROM Account as a
-						WHERE a.id = :accountId""",
-						Account.class)
-				.setParameter("accountId", accountId)
-				.getSingleResultOrNull();
-
-		if (account == null) {
-			throw new AccountNotFoundException();
-		}
-
-		return account;
 	}
 }

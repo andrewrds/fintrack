@@ -2,38 +2,45 @@ package io.github.andrewrds.fintrack.provider;
 
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
+import org.hibernate.Session;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Component;
+
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-
-import org.hibernate.Session;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ProviderService {
 	@PersistenceContext
-	private final EntityManager entityManager;
-
-	@PersistenceContext
 	private final Session session;
 
-	public ProviderService(EntityManager entityManager, Session session) {
-		this.entityManager = entityManager;
+	private final TransactedProviderService transacted;
+
+	public ProviderService(Session session, TransactedProviderService transacted) {
 		this.session = session;
+		this.transacted = transacted;
 	}
 
-	@Transactional
 	public Provider create(String name) {
-		Provider provider = new Provider(name);
-		entityManager.persist(provider);
-		return provider;
+		try {
+			return transacted.create(name);
+		} catch (DataIntegrityViolationException e) {
+			if (e.getCause() instanceof ConstraintViolationException) {
+				throw new DuplicateProviderNameException();
+			} else {
+				throw e;
+			}
+		}
 	}
 
 	@Transactional
-	public Provider delete(long id) {
-		Provider provider = find(id);
-		entityManager.remove(provider);
-		return provider;
+	public void delete(long id) {
+		session.createMutationQuery("""
+				DELETE FROM Provider
+				WHERE id = :id""")
+				.setParameter("id", id)
+				.executeUpdate();
 	}
 
 	public List<Provider> list() {

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.github.andrewrds.fintrack.FintrackError;
+import io.github.andrewrds.fintrack.FintrackResponse;
 import io.github.andrewrds.fintrack.provider.ProviderNotFoundException;
 
 @RestController
@@ -29,8 +30,9 @@ public class AccountRestController {
 	}
 
 	@PostMapping("/account/delete")
-    public Account delete(@NotNull Long id, HttpSession session) {
-    	return accountService.delete(id);
+    public FintrackResponse delete(@NotNull Long id, HttpSession session) {
+    	accountService.delete(id);
+    	return new FintrackResponse("Account deleted");
     }
 	
 	@ExceptionHandler(DataIntegrityViolationException.class)
