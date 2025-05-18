@@ -18,69 +18,69 @@ import org.springframework.test.jdbc.JdbcTestUtils;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ProviderRestControllerIT {
-	@LocalServerPort
-	private int port;
+    @LocalServerPort
+    private int port;
 
-	@Autowired
-	private TestRestTemplate restTemplate;
-	
-	@Autowired
-	private JdbcClient jdbcClient;
-	
-	@BeforeEach
-	void clearDown() {
-		JdbcTestUtils.deleteFromTables(jdbcClient, "provider");
-	}
+    @Autowired
+    private TestRestTemplate restTemplate;
 
-	@Test
-	void testCreate() throws Exception {
-		var name = UUID.randomUUID().toString();
+    @Autowired
+    private JdbcClient jdbcClient;
 
-		var result = restTemplate.postForObject(
-				"http://localhost:" + port + "/provider/create",
-				new CreateProviderRequest(name),
-				String.class);
+    @BeforeEach
+    void clearDown() {
+        JdbcTestUtils.deleteFromTables(jdbcClient, "provider");
+    }
 
-		var json = new JSONObject(result);
-		assertTrue(json.has("id"), "json missing id: " + json);
-		assertTrue(json.has("name"), "json missing name: " + json);
-		assertEquals(name, json.getString("name"));
-	}
+    @Test
+    void testCreate() throws Exception {
+        var name = UUID.randomUUID().toString();
 
-	@Test
-	void testCreate_existing() {
-		var name = UUID.randomUUID().toString();
+        var result = restTemplate.postForObject(
+                "http://localhost:" + port + "/provider/create",
+                new CreateProviderRequest(name),
+                String.class);
 
-		restTemplate.postForObject(
-				"http://localhost:" + port + "/provider/create",
-				new CreateProviderRequest(name),
-				String.class);
+        var json = new JSONObject(result);
+        assertTrue(json.has("id"), "json missing id: " + json);
+        assertTrue(json.has("name"), "json missing name: " + json);
+        assertEquals(name, json.getString("name"));
+    }
 
-		String result = restTemplate.postForObject(
-				"http://localhost:" + port + "/provider/create",
-				new CreateProviderRequest(name),
-				String.class);
+    @Test
+    void testCreate_existing() {
+        var name = UUID.randomUUID().toString();
 
-		assertEquals("""
-				{"error":"A provider with the same name already exists"}""", result);
-	}
+        restTemplate.postForObject(
+                "http://localhost:" + port + "/provider/create",
+                new CreateProviderRequest(name),
+                String.class);
 
-	@Test
-	void testDelete() throws Exception {
-		var name = UUID.randomUUID().toString();
+        String result = restTemplate.postForObject(
+                "http://localhost:" + port + "/provider/create",
+                new CreateProviderRequest(name),
+                String.class);
 
-		var createJson = restTemplate.postForObject(
-				"http://localhost:" + port + "/provider/create",
-				new CreateProviderRequest(name),
-				String.class);
-		var id = new JSONObject(createJson).getLong("id");
+        assertEquals("""
+                {"error":"A provider with the same name already exists"}""", result);
+    }
 
-		var json = restTemplate.postForObject(
-				"http://localhost:" + port + "/provider/delete",
-				new DeleteProviderRequest(id),
-				String.class);
+    @Test
+    void testDelete() throws Exception {
+        var name = UUID.randomUUID().toString();
 
-		assertEquals("""
-				{"message":"Provider deleted"}""", json);
-	}
+        var createJson = restTemplate.postForObject(
+                "http://localhost:" + port + "/provider/create",
+                new CreateProviderRequest(name),
+                String.class);
+        var id = new JSONObject(createJson).getLong("id");
+
+        var json = restTemplate.postForObject(
+                "http://localhost:" + port + "/provider/delete",
+                new DeleteProviderRequest(id),
+                String.class);
+
+        assertEquals("""
+                {"message":"Provider deleted"}""", json);
+    }
 }

@@ -15,7 +15,7 @@ import io.github.andrewrds.fintrack.provider.Provider;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(name = "UQ_provider_name", columnNames = { "provider_id", "name" }))
 public class Account {
-	public static final int NAME_MAX_LENGTH = 100;
+    public static final int NAME_MAX_LENGTH = 100;
 
     @Id
     @GeneratedValue
@@ -29,19 +29,20 @@ public class Account {
     @NotNull
     @Column(length = NAME_MAX_LENGTH)
     private String name;
-    
-    public Account() {}
-    
-    public Account(Provider provider, String name) {
-    	this.provider = provider;
-    	this.name = name;
+
+    public Account() {
     }
 
-	public Long getId() {
-		return id;
-	}
+    public Account(Provider provider, String name) {
+        this.provider = provider;
+        this.name = name;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

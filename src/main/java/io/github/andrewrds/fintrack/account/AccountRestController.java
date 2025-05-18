@@ -18,51 +18,51 @@ import io.github.andrewrds.fintrack.provider.ProviderNotFoundException;
 
 @RestController
 public class AccountRestController {
-	private final AccountService accountService;
+    private final AccountService accountService;
 
-	public AccountRestController(AccountService accountService) {
-		this.accountService = accountService;
-	}
-
-	@PostMapping("/account/create")
-    public Account create(@NotNull Long providerId, @NotNull String name, HttpSession session) {
-    	return accountService.create(providerId, name);
-	}
-
-	@PostMapping("/account/delete")
-    public FintrackResponse delete(@NotNull Long id, HttpSession session) {
-    	accountService.delete(id);
-    	return new FintrackResponse("Account deleted");
+    public AccountRestController(AccountService accountService) {
+        this.accountService = accountService;
     }
-	
-	@ExceptionHandler(DataIntegrityViolationException.class)
-	public ResponseEntity<FintrackError> handleDataIntegrityViolationException(
-			HttpServletRequest request,
-			DataIntegrityViolationException e) {
 
-		if (e.getCause() instanceof ConstraintViolationException v) {
-			if (v.getConstraintName().equals("uq_provider_name")) {
-				var error = new FintrackError("An account with the same name already exists for the provider");
-				return new ResponseEntity<>(error, HttpStatus.CONFLICT);
-			}
-		}
+    @PostMapping("/account/create")
+    public Account create(@NotNull Long providerId, @NotNull String name, HttpSession session) {
+        return accountService.create(providerId, name);
+    }
 
-		throw e;
-	}
-	
-	@ExceptionHandler(ProviderNotFoundException.class)
-	public ResponseEntity<FintrackError> handleProviderNotFoundException(
-			HttpServletRequest request,
-			ProviderNotFoundException e) {
-		var error = new FintrackError("No provider exists with the supplied id");
-		return new ResponseEntity<FintrackError>(error, HttpStatus.NOT_FOUND);
-	}
-	
-	@ExceptionHandler(AccountNotFoundException.class)
-	public ResponseEntity<FintrackError> handleAccountNotFoundException(
-			HttpServletRequest request,
-			AccountNotFoundException e) {
-		var error = new FintrackError("No account exists with the supplied id");
-		return new ResponseEntity<FintrackError>(error, HttpStatus.NOT_FOUND);
-	}
+    @PostMapping("/account/delete")
+    public FintrackResponse delete(@NotNull Long id, HttpSession session) {
+        accountService.delete(id);
+        return new FintrackResponse("Account deleted");
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<FintrackError> handleDataIntegrityViolationException(
+            HttpServletRequest request,
+            DataIntegrityViolationException e) {
+
+        if (e.getCause() instanceof ConstraintViolationException v) {
+            if (v.getConstraintName().equals("uq_provider_name")) {
+                var error = new FintrackError("An account with the same name already exists for the provider");
+                return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+            }
+        }
+
+        throw e;
+    }
+
+    @ExceptionHandler(ProviderNotFoundException.class)
+    public ResponseEntity<FintrackError> handleProviderNotFoundException(
+            HttpServletRequest request,
+            ProviderNotFoundException e) {
+        var error = new FintrackError("No provider exists with the supplied id");
+        return new ResponseEntity<FintrackError>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AccountNotFoundException.class)
+    public ResponseEntity<FintrackError> handleAccountNotFoundException(
+            HttpServletRequest request,
+            AccountNotFoundException e) {
+        var error = new FintrackError("No account exists with the supplied id");
+        return new ResponseEntity<FintrackError>(error, HttpStatus.NOT_FOUND);
+    }
 }

@@ -17,43 +17,43 @@ import jakarta.servlet.http.HttpSession;
 
 @RestController
 public class ProviderRestController {
-	private final ProviderService providerService;
+    private final ProviderService providerService;
 
-	public ProviderRestController(ProviderService providerService) {
-		this.providerService = providerService;
-	}
+    public ProviderRestController(ProviderService providerService) {
+        this.providerService = providerService;
+    }
 
-	@PostMapping("/provider/create")
-	public Provider create(@RequestBody CreateProviderRequest req, HttpSession session) {
-		return providerService.create(req.getName());
-	}
+    @PostMapping("/provider/create")
+    public Provider create(@RequestBody CreateProviderRequest req, HttpSession session) {
+        return providerService.create(req.getName());
+    }
 
-	@PostMapping("/provider/delete")
-	public FintrackResponse delete(@RequestBody DeleteProviderRequest req, HttpSession session) {
-		providerService.delete(req.getId());
-		return new FintrackResponse("Provider deleted");
-	}
-	
-	@GetMapping("/provider/list")
-	public List<Provider> list() {
-		return providerService.list();
-	}
+    @PostMapping("/provider/delete")
+    public FintrackResponse delete(@RequestBody DeleteProviderRequest req, HttpSession session) {
+        providerService.delete(req.getId());
+        return new FintrackResponse("Provider deleted");
+    }
 
-	@ExceptionHandler(DuplicateProviderNameException.class)
-	public ResponseEntity<FintrackError> handleDuplicateProviderNameException(
-			HttpServletRequest request,
-			DuplicateProviderNameException e) {
-		var error = new FintrackError("A provider with the same name already exists");
-		return ResponseEntity.status(HttpStatus.CONFLICT)
-				.body(error);
-	}
+    @GetMapping("/provider/list")
+    public List<Provider> list() {
+        return providerService.list();
+    }
 
-	@ExceptionHandler(ProviderNotFoundException.class)
-	public ResponseEntity<FintrackError> handleProviderNotFoundException(
-			HttpServletRequest request,
-			ProviderNotFoundException e) {
-		var error = new FintrackError("No provider exists with the supplied id");
-		return ResponseEntity.status(HttpStatus.NOT_FOUND)
-				.body(error);
-	}
+    @ExceptionHandler(DuplicateProviderNameException.class)
+    public ResponseEntity<FintrackError> handleDuplicateProviderNameException(
+            HttpServletRequest request,
+            DuplicateProviderNameException e) {
+        var error = new FintrackError("A provider with the same name already exists");
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
+    @ExceptionHandler(ProviderNotFoundException.class)
+    public ResponseEntity<FintrackError> handleProviderNotFoundException(
+            HttpServletRequest request,
+            ProviderNotFoundException e) {
+        var error = new FintrackError("No provider exists with the supplied id");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(error);
+    }
 }

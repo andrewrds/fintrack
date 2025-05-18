@@ -8,17 +8,17 @@ import jakarta.transaction.Transactional;
 
 @Component
 public class TransactedProviderService {
-	@PersistenceContext
-	private final Session session;
+    @PersistenceContext
+    private final Session session;
 
-	public TransactedProviderService(Session session) {
-		this.session = session;
-	}
+    public TransactedProviderService(Session session) {
+        this.session = session;
+    }
 
-	@Transactional
-	public Provider create(String name) {
-		Provider provider = new Provider(name);
-		session.persist(provider);
-		return provider;
-	}
+    @Transactional
+    public Provider create(String name) {
+        Provider provider = new Provider(name);
+        session.persist(provider);
+        return provider;
+    }
 }

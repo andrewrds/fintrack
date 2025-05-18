@@ -14,43 +14,43 @@ import io.github.andrewrds.fintrack.provider.ProviderService;
 
 @Component
 public class AccountService {
-	@PersistenceContext
-	private final EntityManager entityManager;
+    @PersistenceContext
+    private final EntityManager entityManager;
 
-	@PersistenceContext
-	private final Session session;
+    @PersistenceContext
+    private final Session session;
 
-	private final ProviderService providerService;
+    private final ProviderService providerService;
 
-	public AccountService(EntityManager entityManager, Session session, ProviderService providerService) {
-		this.entityManager = entityManager;
-		this.session = session;
-		this.providerService = providerService;
-	}
+    public AccountService(EntityManager entityManager, Session session, ProviderService providerService) {
+        this.entityManager = entityManager;
+        this.session = session;
+        this.providerService = providerService;
+    }
 
-	@Transactional
-	public Account create(long providerId, String accountName) {
-		var provider = providerService.find(providerId);
-		var account = new Account(provider, accountName);
-		entityManager.persist(account);
-		return account;
-	}
+    @Transactional
+    public Account create(long providerId, String accountName) {
+        var provider = providerService.find(providerId);
+        var account = new Account(provider, accountName);
+        entityManager.persist(account);
+        return account;
+    }
 
-	@Transactional
-	public void delete(long accountId) {
-		session.createMutationQuery("""
-				DELETE FROM Account
-				WHERE id = :id""")
-				.setParameter("id", accountId)
-				.executeUpdate();
-	}
+    @Transactional
+    public void delete(long accountId) {
+        session.createMutationQuery("""
+                DELETE FROM Account
+                WHERE id = :id""")
+                .setParameter("id", accountId)
+                .executeUpdate();
+    }
 
-	public List<Account> listForProvider(Provider provider) {
-		return session.createQuery("""
-				FROM Account as a
-				WHERE a.provider.id = :providerId
-				ORDER BY a.name""", Account.class)
-				.setParameter("providerId", provider.getId())
-				.getResultList();
-	}
+    public List<Account> listForProvider(Provider provider) {
+        return session.createQuery("""
+                FROM Account as a
+                WHERE a.provider.id = :providerId
+                ORDER BY a.name""", Account.class)
+                .setParameter("providerId", provider.getId())
+                .getResultList();
+    }
 }
