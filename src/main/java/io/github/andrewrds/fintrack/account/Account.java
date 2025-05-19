@@ -1,5 +1,6 @@
 package io.github.andrewrds.fintrack.account;
 
+import io.github.andrewrds.fintrack.provider.Provider;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -10,7 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
-import io.github.andrewrds.fintrack.provider.Provider;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(name = "UQ_provider_name", columnNames = { "provider_id", "name" }))
@@ -28,6 +29,7 @@ public class Account {
 
     @NotNull
     @Column(length = NAME_MAX_LENGTH)
+    @Size(min = 0, max = Account.NAME_MAX_LENGTH)
     private String name;
 
     public Account() {

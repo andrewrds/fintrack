@@ -16,6 +16,7 @@ import io.github.andrewrds.fintrack.FintrackResponse;
 import io.github.andrewrds.fintrack.provider.ProviderNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 @RestController
 public class AccountRestController {
@@ -26,12 +27,12 @@ public class AccountRestController {
     }
 
     @PostMapping("/account/create")
-    public Account create(@RequestBody CreateAccountRequest req, HttpSession session) {
+    public Account create(@Valid @RequestBody CreateAccountRequest req, HttpSession session) {
         return accountService.create(req.getProviderId(), req.getName());
     }
 
     @PostMapping("/account/delete")
-    public FintrackResponse delete(@RequestBody DeleteAccountRequest req, HttpSession session) {
+    public FintrackResponse delete(@Valid @RequestBody DeleteAccountRequest req, HttpSession session) {
         accountService.delete(req.getId());
         return new FintrackResponse("Account deleted");
     }

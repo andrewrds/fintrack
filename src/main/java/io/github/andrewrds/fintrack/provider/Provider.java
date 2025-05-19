@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(name = "UQ_name", columnNames = { "name" }))
@@ -19,6 +20,7 @@ public class Provider {
 
     @NotNull
     @Column(length = NAME_MAX_LENGTH)
+    @Size(min = 0, max = Provider.NAME_MAX_LENGTH)
     private String name;
 
     public Provider() {

@@ -53,6 +53,20 @@ class ProviderRestControllerIT {
         assertEquals("""
                 {"error":"A provider with the same name already exists"}""", result);
     }
+    
+    @Test
+    void testCreate_tooLong() throws Exception {
+        var name = "abc".repeat(50);
+
+        var result = restTemplate.postForObject(
+                "http://localhost:" + port + "/provider/create",
+                new CreateProviderRequest(name),
+                String.class);
+        
+        var json = new JSONObject(result);
+
+        assertEquals("Bad Request", json.getString("error"));
+    }
 
     @Test
     void testDelete() throws Exception {

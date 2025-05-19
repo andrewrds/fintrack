@@ -14,6 +14,7 @@ import io.github.andrewrds.fintrack.FintrackError;
 import io.github.andrewrds.fintrack.FintrackResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 @RestController
 public class ProviderRestController {
@@ -24,12 +25,12 @@ public class ProviderRestController {
     }
 
     @PostMapping("/provider/create")
-    public Provider create(@RequestBody CreateProviderRequest req, HttpSession session) {
+    public Provider create(@Valid @RequestBody CreateProviderRequest req, HttpSession session) {
         return providerService.create(req.getName());
     }
 
     @PostMapping("/provider/delete")
-    public FintrackResponse delete(@RequestBody DeleteProviderRequest req, HttpSession session) {
+    public FintrackResponse delete(@Valid @RequestBody DeleteProviderRequest req, HttpSession session) {
         providerService.delete(req.getId());
         return new FintrackResponse("Provider deleted");
     }
