@@ -2,7 +2,6 @@ package io.github.andrewrds.fintrack.account;
 
 import java.util.List;
 
-import org.hibernate.Session;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
@@ -17,14 +16,10 @@ public class AccountService {
     @PersistenceContext
     private final EntityManager entityManager;
 
-    @PersistenceContext
-    private final Session session;
-
     private final TransactedAccountService transacted;
 
-    public AccountService(EntityManager entityManager, Session session, TransactedAccountService transacted) {
+    public AccountService(EntityManager entityManager, TransactedAccountService transacted) {
         this.entityManager = entityManager;
-        this.session = session;
         this.transacted = transacted;
     }
 
@@ -42,7 +37,7 @@ public class AccountService {
 
     @Transactional
     public void delete(long accountId) {
-        session.createMutationQuery("""
+        entityManager.createQuery("""
                 DELETE FROM Account
                 WHERE id = :id""")
                 .setParameter("id", accountId)
@@ -50,7 +45,7 @@ public class AccountService {
     }
 
     public List<Account> listForProvider(Provider provider) {
-        return session.createQuery("""
+        return entityManager.createQuery("""
                 FROM Account as a
                 WHERE a.provider.id = :providerId
                 ORDER BY a.name""", Account.class)

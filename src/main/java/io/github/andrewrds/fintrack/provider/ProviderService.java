@@ -2,23 +2,24 @@ package io.github.andrewrds.fintrack.provider;
 
 import java.util.List;
 
-import org.hibernate.Session;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @Component
 public class ProviderService {
     @PersistenceContext
-    private final Session session;
+    private final EntityManager entityManager;
 
     private final TransactedProviderService transacted;
 
-    public ProviderService(Session session, TransactedProviderService transacted) {
-        this.session = session;
+    public ProviderService(EntityManager entityManager, TransactedProviderService transacted) {
+        this.entityManager = entityManager;
         this.transacted = transacted;
     }
 
@@ -36,7 +37,7 @@ public class ProviderService {
 
     @Transactional
     public void delete(long id) {
-        session.createMutationQuery("""
+        entityManager.createQuery("""
                 DELETE FROM Provider
                 WHERE id = :id""")
                 .setParameter("id", id)
@@ -44,23 +45,21 @@ public class ProviderService {
     }
 
     public List<Provider> list() {
-        return session.createQuery("""
+        return entityManager.createQuery("""
                 FROM Provider as p
                 ORDER BY p.name""", Provider.class)
                 .getResultList();
     }
 
     public Provider find(long id) {
-        Provider provider = session.createQuery("""
-                FROM Provider as p
-                WHERE p.id = :id""", Provider.class)
-                .setParameter("id", id)
-                .getSingleResultOrNull();
-
-        if (provider == null) {
+        try {
+            return entityManager.createQuery("""
+                    FROM Provider as p
+                    WHERE p.id = :id""", Provider.class)
+                    .setParameter("id", id)
+                    .getSingleResult();
+        } catch (NoResultException e) {
             throw new ProviderNotFoundException();
         }
-
-        return provider;
     }
 }

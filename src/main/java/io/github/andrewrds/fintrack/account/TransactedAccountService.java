@@ -1,21 +1,21 @@
 package io.github.andrewrds.fintrack.account;
 
-import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import io.github.andrewrds.fintrack.provider.ProviderService;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @Component
 public class TransactedAccountService {
     @PersistenceContext
-    private final Session session;
+    private final EntityManager entityManager;
 
     private final ProviderService providerService;
 
-    public TransactedAccountService(Session session, ProviderService providerService) {
-        this.session = session;
+    public TransactedAccountService(EntityManager entityManager, ProviderService providerService) {
+        this.entityManager = entityManager;
         this.providerService = providerService;
     }
 
@@ -23,7 +23,7 @@ public class TransactedAccountService {
     public Account create(long providerId, String accountName) {
         var provider = providerService.find(providerId);
         var account = new Account(provider, accountName);
-        session.persist(account);
+        entityManager.persist(account);
         return account;
     }
 }
