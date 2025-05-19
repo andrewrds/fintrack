@@ -1,20 +1,17 @@
 package io.github.andrewrds.fintrack.account;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.constraints.NotNull;
-
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.github.andrewrds.fintrack.FintrackError;
 import io.github.andrewrds.fintrack.FintrackResponse;
 import io.github.andrewrds.fintrack.provider.ProviderNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 public class AccountRestController {
@@ -25,29 +22,22 @@ public class AccountRestController {
     }
 
     @PostMapping("/account/create")
-    public Account create(@NotNull Long providerId, @NotNull String name, HttpSession session) {
-        return accountService.create(providerId, name);
+    public Account create(@RequestBody CreateAccountRequest req, HttpSession session) {
+        return accountService.create(req.getProviderId(), req.getName());
     }
 
     @PostMapping("/account/delete")
-    public FintrackResponse delete(@NotNull Long id, HttpSession session) {
-        accountService.delete(id);
+    public FintrackResponse delete(@RequestBody DeleteAccountRequest req, HttpSession session) {
+        accountService.delete(req.getId());
         return new FintrackResponse("Account deleted");
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<FintrackError> handleDataIntegrityViolationException(
+    @ExceptionHandler(DuplicateAccountNameException.class)
+    public ResponseEntity<FintrackError> handleDuplicateAccountNameException(
             HttpServletRequest request,
-            DataIntegrityViolationException e) {
-
-        if (e.getCause() instanceof ConstraintViolationException v) {
-            if (v.getConstraintName().equals("uq_provider_name")) {
-                var error = new FintrackError("An account with the same name already exists for the provider");
-                return new ResponseEntity<>(error, HttpStatus.CONFLICT);
-            }
-        }
-
-        throw e;
+            DuplicateAccountNameException e) {
+        var error = new FintrackError("An account with the same name already exists for the provider");
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ProviderNotFoundException.class)

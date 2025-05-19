@@ -2,15 +2,15 @@ package io.github.andrewrds.fintrack.account;
 
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
-
 import org.hibernate.Session;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import io.github.andrewrds.fintrack.provider.Provider;
-import io.github.andrewrds.fintrack.provider.ProviderService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 
 @Component
 public class AccountService {
@@ -20,20 +20,24 @@ public class AccountService {
     @PersistenceContext
     private final Session session;
 
-    private final ProviderService providerService;
+    private final TransactedAccountService transacted;
 
-    public AccountService(EntityManager entityManager, Session session, ProviderService providerService) {
+    public AccountService(EntityManager entityManager, Session session, TransactedAccountService transacted) {
         this.entityManager = entityManager;
         this.session = session;
-        this.providerService = providerService;
+        this.transacted = transacted;
     }
 
-    @Transactional
     public Account create(long providerId, String accountName) {
-        var provider = providerService.find(providerId);
-        var account = new Account(provider, accountName);
-        entityManager.persist(account);
-        return account;
+        try {
+            return transacted.create(providerId, accountName);
+        } catch (DataIntegrityViolationException e) {
+            if (e.getCause() instanceof ConstraintViolationException) {
+                throw new DuplicateAccountNameException();
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Transactional

@@ -6,15 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.UUID;
 
 import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.test.jdbc.JdbcTestUtils;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ProviderRestControllerIT {
@@ -23,14 +20,6 @@ class ProviderRestControllerIT {
 
     @Autowired
     private TestRestTemplate restTemplate;
-
-    @Autowired
-    private JdbcClient jdbcClient;
-
-    @BeforeEach
-    void clearDown() {
-        JdbcTestUtils.deleteFromTables(jdbcClient, "provider");
-    }
 
     @Test
     void testCreate() throws Exception {
