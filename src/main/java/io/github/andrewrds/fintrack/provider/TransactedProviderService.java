@@ -21,4 +21,13 @@ public class TransactedProviderService {
         entityManager.persist(provider);
         return provider;
     }
+    
+    @Transactional
+    public void delete(long id) {
+        entityManager.createQuery("""
+                DELETE FROM Provider
+                WHERE id = :id""")
+                .setParameter("id", id)
+                .executeUpdate();
+    }
 }

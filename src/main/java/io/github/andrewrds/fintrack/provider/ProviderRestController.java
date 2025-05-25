@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,17 +26,20 @@ public class ProviderRestController {
     }
 
     @PostMapping("/provider/create")
+    @CrossOrigin(origins = "http://localhost:5173")
     public Provider create(@Valid @RequestBody CreateProviderRequest req, HttpSession session) {
         return providerService.create(req.getName());
     }
 
     @PostMapping("/provider/delete")
+    @CrossOrigin(origins = "http://localhost:5173")
     public FintrackResponse delete(@Valid @RequestBody DeleteProviderRequest req, HttpSession session) {
         providerService.delete(req.getId());
         return new FintrackResponse("Provider deleted");
     }
 
     @GetMapping("/provider/list")
+    @CrossOrigin(origins = "http://localhost:5173")
     public List<Provider> list() {
         return providerService.list();
     }
@@ -55,6 +59,15 @@ public class ProviderRestController {
             ProviderNotFoundException e) {
         var error = new FintrackError("No provider exists with the supplied id");
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(error);
+    }
+    
+    @ExceptionHandler(DeleteProviderException.class)
+    public ResponseEntity<FintrackError> handleDeleteProviderException(
+            HttpServletRequest request,
+            DeleteProviderException e) {
+        var error = new FintrackError("Unable to delete provider");
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(error);
     }
 }

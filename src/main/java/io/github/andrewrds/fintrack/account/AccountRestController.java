@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,17 +28,20 @@ public class AccountRestController {
     }
 
     @PostMapping("/account/create")
+    @CrossOrigin(origins = "http://localhost:5173")
     public Account create(@Valid @RequestBody CreateAccountRequest req, HttpSession session) {
         return accountService.create(req.getProviderId(), req.getName());
     }
 
     @PostMapping("/account/delete")
+    @CrossOrigin(origins = "http://localhost:5173")
     public FintrackResponse delete(@Valid @RequestBody DeleteAccountRequest req, HttpSession session) {
         accountService.delete(req.getId());
         return new FintrackResponse("Account deleted");
     }
     
     @GetMapping("account/listForProvider")
+    @CrossOrigin(origins = "http://localhost:5173")
     public List<Account> listForProvider(@RequestParam long providerId) {
         return accountService.listForProvider(providerId);
     }

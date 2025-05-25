@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 
 @Component
 public class ProviderService {
@@ -35,13 +34,12 @@ public class ProviderService {
         }
     }
 
-    @Transactional
     public void delete(long id) {
-        entityManager.createQuery("""
-                DELETE FROM Provider
-                WHERE id = :id""")
-                .setParameter("id", id)
-                .executeUpdate();
+        try {
+            transacted.delete(id);
+        } catch (ConstraintViolationException e) {
+            throw new DeleteProviderException();
+        }
     }
 
     public List<Provider> list() {
