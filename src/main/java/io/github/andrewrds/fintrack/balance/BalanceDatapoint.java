@@ -33,4 +33,20 @@ public class BalanceDatapoint {
 
     @NotNull
     private BigDecimal balance;
+
+    public Long getId() {
+        return id;
+    }
+
+    public BalanceSnapshot getBalanceSnapshot() {
+        return balanceSnapshot;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public BigDecimal getBalance() {
+        return balance;
+    }
 }
