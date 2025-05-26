@@ -1,9 +1,13 @@
 package io.github.andrewrds.fintrack.provider;
 
+import java.util.Set;
+
+import io.github.andrewrds.fintrack.account.Account;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
@@ -22,6 +26,9 @@ public class Provider {
     @Column(length = NAME_MAX_LENGTH)
     @Size(min = 0, max = Provider.NAME_MAX_LENGTH)
     private String name;
+    
+    @OneToMany(mappedBy = "provider")
+    private Set<Account> accounts;
 
     public Provider() {
     }
@@ -36,5 +43,9 @@ public class Provider {
 
     public String getName() {
         return name;
+    }
+
+    public Set<Account> getAccounts() {
+        return accounts;
     }
 }

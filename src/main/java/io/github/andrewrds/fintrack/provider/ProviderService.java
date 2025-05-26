@@ -42,11 +42,13 @@ public class ProviderService {
         }
     }
 
-    public List<Provider> list() {
+    public List<ProviderResponse> list() {
         return entityManager.createQuery("""
                 FROM Provider as p
                 ORDER BY p.name""", Provider.class)
-                .getResultList();
+                .getResultList().stream()
+                .map(p -> new ProviderResponse(p.getId(), p.getName()))
+                .toList();
     }
 
     public Provider find(long id) {

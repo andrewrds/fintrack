@@ -1,5 +1,8 @@
 package io.github.andrewrds.fintrack.account;
 
+import java.util.List;
+
+import io.github.andrewrds.fintrack.balance.BalanceDatapoint;
 import io.github.andrewrds.fintrack.provider.Provider;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
@@ -31,6 +35,9 @@ public class Account {
     @Column(length = NAME_MAX_LENGTH)
     @Size(min = 0, max = Account.NAME_MAX_LENGTH)
     private String name;
+    
+    @OneToMany(mappedBy = "account")
+    private List<BalanceDatapoint> datapoints;
 
     public Account() {
     }
@@ -46,5 +53,13 @@ public class Account {
 
     public String getName() {
         return name;
+    }
+
+    public Provider getProvider() {
+        return provider;
+    }
+
+    public List<BalanceDatapoint> getDatapoints() {
+        return datapoints;
     }
 }

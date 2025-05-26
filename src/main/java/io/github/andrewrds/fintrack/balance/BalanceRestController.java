@@ -15,7 +15,6 @@ public class BalanceRestController {
     @GetMapping("/balance/list")
     @CrossOrigin(origins = "http://localhost:5173")
     public BalanceSnapshotResponse list() {
-        System.out.println(balanceService.list());
         return balanceService.list();
     }
 }

@@ -40,7 +40,7 @@ public class ProviderRestController {
 
     @GetMapping("/provider/list")
     @CrossOrigin(origins = "http://localhost:5173")
-    public List<Provider> list() {
+    public List<ProviderResponse> list() {
         return providerService.list();
     }
 

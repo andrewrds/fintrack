@@ -42,7 +42,7 @@ public class AccountRestController {
     
     @GetMapping("account/listForProvider")
     @CrossOrigin(origins = "http://localhost:5173")
-    public List<Account> listForProvider(@RequestParam long providerId) {
+    public List<AccountResponse> listForProvider(@RequestParam long providerId) {
         return accountService.listForProvider(providerId);
     }
 

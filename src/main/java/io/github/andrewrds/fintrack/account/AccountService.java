@@ -43,12 +43,14 @@ public class AccountService {
                 .executeUpdate();
     }
 
-    public List<Account> listForProvider(long providerId) {
+    public List<AccountResponse> listForProvider(long providerId) {
         return entityManager.createQuery("""
                 FROM Account as a
                 WHERE a.provider.id = :providerId
                 ORDER BY a.name""", Account.class)
                 .setParameter("providerId", providerId)
-                .getResultList();
+                .getResultList().stream()
+                .map(a -> new AccountResponse(a.getId(), a.getName()))
+                .toList();
     }
 }

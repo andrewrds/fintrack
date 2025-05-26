@@ -1,6 +1,7 @@
 package io.github.andrewrds.fintrack.balance;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import io.github.andrewrds.fintrack.account.Account;
 import jakarta.persistence.Entity;
@@ -14,22 +15,20 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(name = "UQ_datapoint", columnNames = { "balance_snapshot_id", "account_id" }))
+@Table(uniqueConstraints = @UniqueConstraint(name = "UQ_datapoint", columnNames = { "account_id", "balance_date" }))
 public class BalanceDatapoint {
 
     @Id
     @GeneratedValue
     private Long id;
-    
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "balance_snapshot_id", foreignKey = @ForeignKey(name = "FK_balance_snapshot_id"))
-    private BalanceSnapshot balanceSnapshot;
 
     @NotNull
     @ManyToOne
     @JoinColumn(name = "account_id", foreignKey = @ForeignKey(name = "FK_account_id"))
     private Account account;
+
+    @NotNull
+    private LocalDate balanceDate;
 
     @NotNull
     private BigDecimal balance;
@@ -38,12 +37,12 @@ public class BalanceDatapoint {
         return id;
     }
 
-    public BalanceSnapshot getBalanceSnapshot() {
-        return balanceSnapshot;
-    }
-
     public Account getAccount() {
         return account;
+    }
+
+    public LocalDate getBalanceDate() {
+        return balanceDate;
     }
 
     public BigDecimal getBalance() {

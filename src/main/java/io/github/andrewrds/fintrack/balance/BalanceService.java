@@ -1,13 +1,15 @@
 package io.github.andrewrds.fintrack.balance;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import io.github.andrewrds.fintrack.provider.Provider;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -22,41 +24,41 @@ public class BalanceService {
 
     public BalanceSnapshotResponse list() {
 
-        List<BalanceSnapshot> snapshots = entityManager.createQuery("""
-                FROM BalanceSnapshot as s
-                ORDER BY s.balanceDate""", BalanceSnapshot.class)
+        List<Provider> result = entityManager.createQuery("""
+                FROM Provider as p
+                INNER JOIN FETCH p.accounts as a
+                INNER JOIN FETCH a.datapoints as dp""", Provider.class)
                 .getResultList();
 
-        var accountList = new LinkedHashSet<BalanceSnapshotResponse.Account>();
-        for (BalanceSnapshot s : snapshots) {
-            for (BalanceDatapoint datapoint : s.getDatapoints()) {
-                var a = datapoint.getAccount();
+        var dates = result.stream()
+                .flatMap(p -> p.getAccounts().stream())
+                .flatMap(a -> a.getDatapoints().stream())
+                .map(d -> d.getBalanceDate())
+                .sorted()
+                .collect(Collectors.toSet());
+
+        var providers = new ArrayList<BalanceSnapshotResponse.Provider>();
+        for (var p : result) {
+            var provider = new BalanceSnapshotResponse.Provider(p.getId(), p.getName());
+            providers.add(provider);
+
+            for (var a : p.getAccounts()) {
                 var account = new BalanceSnapshotResponse.Account(a.getId(), a.getName());
-                accountList.add(account);
+                provider.accounts().add(account);
+
+                var dpMap = new HashMap<LocalDate, BalanceDatapoint>();
+                for (BalanceDatapoint dp : a.getDatapoints()) {
+                    dpMap.put(dp.getBalanceDate(), dp);
+                }
+
+                for (LocalDate d : dates) {
+                    BalanceDatapoint dp = dpMap.get(d);
+                    BigDecimal balance = (dp != null) ? dp.getBalance() : null;
+                    account.balances().add(balance);
+                }
             }
         }
 
-        var snapshotResponse = new ArrayList<BalanceSnapshotResponse.Snapshot>();
-        for (BalanceSnapshot s : snapshots) {
-            var dpMap = new HashMap<Long, BalanceDatapoint>();
-
-            for (BalanceDatapoint datapoint : s.getDatapoints()) {
-                dpMap.put(datapoint.getAccount().getId(), datapoint);
-            }
-
-            var datapoints = new ArrayList<BalanceSnapshotResponse.Datapoint>();
-            for (var account : accountList) {
-                var datapoint = dpMap.get(account.id());
-                BigDecimal balance = (datapoint != null)
-                        ? datapoint.getBalance()
-                        : BigDecimal.ZERO;
-                datapoints.add(new BalanceSnapshotResponse.Datapoint(balance));
-            }
-
-            var snapshot = new BalanceSnapshotResponse.Snapshot(s.getBalanceDate(), datapoints);
-            snapshotResponse.add(snapshot);
-        }
-
-        return new BalanceSnapshotResponse(new ArrayList<>(accountList), snapshotResponse);
+        return new BalanceSnapshotResponse(new ArrayList<>(dates), providers);
     }
 }
